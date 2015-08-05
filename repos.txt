@@ -1,0 +1,2 @@
+https://github.com/arbor/yara
+https://github.com/Yara-Rules/rules
