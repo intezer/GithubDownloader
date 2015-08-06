@@ -2,7 +2,7 @@
 Find and download files from multiple Github repositories
 
 ## Requirements
-    pip install PyGithub`
+    pip install PyGithub
 
 ## Usage
     git_downloader.py [-h] [-r REPO_FILE] [-w WILDCARD] [-o OUTPUT_DIR]
