@@ -23,3 +23,6 @@ Find and download files from multiple Github repositories
       -t TIMEOUT, --timeout TIMEOUT
                             Socket timeout (seconds)
       -v, --verbose         increase output verbosity
+      
+## Example
+    python git_downloader.py -r repos.txt -w *.txt -o /directory/for/downloaded/files
