@@ -26,6 +26,3 @@ Find and download files from multiple Github repositories
       
 ## Example
     python git_downloader.py -r repos.txt -w *.txt -o /directory/for/downloaded/files
-
-## About us
-http://www.theresponder.co
