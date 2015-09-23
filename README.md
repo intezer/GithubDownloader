@@ -31,4 +31,5 @@ Keep in mind you need to change "repos.txt" to add the repos you want to downloa
     
 ## Use to download YARA signatures
 This tool can be used to easily download all the YARA signatures in Github.  The example "repos.txt" contains many links to Github repos with YARA signatures, so the only thing left to do is to run the tool with this command:
+
     python git_downloader.py -r repos.txt -w *.yar* -o /directory/for/downloaded/files
