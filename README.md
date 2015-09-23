@@ -1,5 +1,5 @@
 # Github Downloader
-Find and download files from multiple Github repositories
+Find and download files using wildcards from multiple Github repositories
 
 ## Requirements
     pip install PyGithub
