@@ -35,6 +35,15 @@ def main(args, loglevel):
                         logging.error('Error downloading %s' % file)
             except:
                  logging.error('Error fetching repository %s' % line)
+    args.yara_meta = os.path.join(args.output_dir, args.yara_meta)
+    with open(args.yara_meta, 'w') as f:
+        for i in os.listdir(args.output_dir):
+            try:
+                f.write("include \"" + i + "\"\n")
+            except:
+                logging.error('Couldn\'t write to %s' % args.yara_meta)
+
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description = "Github file downloader")
@@ -50,6 +59,11 @@ if __name__ == '__main__':
                         "--output_dir",
                         default = "",
                         help = "Directory to store all downloaded files")
+
+    parser.add_argument("-y",
+                        "--yara-meta",
+                        default = "rules.yara",
+                        help = "Yara meta rule filename to create")
 
     parser.add_argument("-t",
                         "--timeout",
