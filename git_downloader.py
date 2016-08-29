@@ -1,8 +1,16 @@
 #!/usr/bin/env python
 #
 
-import sys, os, argparse, logging, fnmatch, urllib, posixpath, urlparse, socket
+import sys, os, argparse, logging, fnmatch, posixpath, socket
 from github import Github
+if sys.version_info < (3, 0):
+    # python 2
+    import urlparse
+    from urllib import urlretrieve
+else:
+    # python 3
+    import urllib.parse as urlparse
+    from urllib.request import urlretrieve
 
 def main(args, loglevel):
     logging.basicConfig(format="%(levelname)s: %(message)s", level=loglevel)
@@ -30,7 +38,7 @@ def main(args, loglevel):
                     if os.path.exists(output_path):
                         output_path += "-" + str(file_counter)
                     try:
-                        urllib.urlretrieve(file, output_path)
+                        urlretrieve(file, output_path)
                     except Exception as error:
                         logging.error('Error downloading %s. %s' % (file, error))
             except Exception as error:
