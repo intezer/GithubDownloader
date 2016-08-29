@@ -31,17 +31,17 @@ def main(args, loglevel):
                         output_path += "-" + str(file_counter)
                     try:
                         urllib.urlretrieve(file, output_path)
-                    except:
-                        logging.error('Error downloading %s' % file)
-            except:
-                 logging.error('Error fetching repository %s' % line)
+                    except Exception as error:
+                        logging.error('Error downloading %s. %s' % (file, error))
+            except Exception as error:
+                 logging.error('Error fetching repository %s. %s' % (line, error))
     args.yara_meta = os.path.join(args.output_dir, args.yara_meta)
     with open(args.yara_meta, 'w') as f:
         for i in os.listdir(args.output_dir):
             try:
                 f.write("include \"" + i + "\"\n")
-            except:
-                logging.error('Couldn\'t write to %s' % args.yara_meta)
+            except Exception as error:
+                logging.error('Couldn\'t write to %s: %s' % (args.yara_meta, error))
 
 
 
