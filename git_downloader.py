@@ -1,8 +1,16 @@
 #!/usr/bin/env python
 #
 
-import sys, os, argparse, logging, fnmatch, urllib, posixpath, urlparse, socket
+import sys, os, argparse, logging, fnmatch, posixpath, socket
 from github import Github
+if sys.version_info < (3, 0):
+    # python 2
+    import urlparse
+    from urllib import urlretrieve
+else:
+    # python 3
+    import urllib.parse as urlparse
+    from urllib.request import urlretrieve
 
 def main(args, loglevel):
     logging.basicConfig(format="%(levelname)s: %(message)s", level=loglevel)
@@ -30,18 +38,18 @@ def main(args, loglevel):
                     if os.path.exists(output_path):
                         output_path += "-" + str(file_counter)
                     try:
-                        urllib.urlretrieve(file, output_path)
-                    except:
-                        logging.error('Error downloading %s' % file)
-            except:
-                 logging.error('Error fetching repository %s' % line)
+                        urlretrieve(file, output_path)
+                    except Exception as e:
+                        logging.exception('Error downloading %s.' % file)
+            except Exception as e:
+                 logging.exception('Error fetching repository %s.' % line)
     args.yara_meta = os.path.join(args.output_dir, args.yara_meta)
     with open(args.yara_meta, 'w') as f:
         for i in os.listdir(args.output_dir):
             try:
                 f.write("include \"" + i + "\"\n")
-            except:
-                logging.error('Couldn\'t write to %s' % args.yara_meta)
+            except Exception as e:
+                logging.exception('Couldn\'t write to %s.' % args.yara_meta)
 
 
 
