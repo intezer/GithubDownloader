@@ -16,8 +16,11 @@ def main(args, loglevel):
     logging.basicConfig(format="%(levelname)s: %(message)s", level=loglevel)
 
     socket.setdefaulttimeout(args.timeout)
-    
-    g = Github()
+
+    if args.username and args.password:
+      g = Github(args.username, args.password)
+    else:
+      g = Github()
     with open(args.repo_file, 'r') as f:
         file_counter = 0
         for line in f.readlines():
@@ -55,14 +58,24 @@ def main(args, loglevel):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description = "Github file downloader")
+    parser.add_argument("-u",
+                        "--username",
+                        default = None,
+                        help = "Username used to authenticate with github for increased rate limit")
+
+    parser.add_argument("-p",
+                        "--password",
+                        default = None,
+                        help = "Password or token used to authenticate with github")
+
     parser.add_argument("-r",
                         "--repo_file",
                         help = "Path for the input file which contains a url of a Github repository for each separate line")
-                        
+
     parser.add_argument("-w",
                         "--wildcard",
                         help = "Unix shell-style wildcard to match files to download (for example: *.txt)")
-                        
+
     parser.add_argument("-o",
                         "--output_dir",
                         default = "",
@@ -77,17 +90,17 @@ if __name__ == '__main__':
                         "--timeout",
                         default = 30,
                         help = "Socket timeout (seconds)")
-                        
+
     parser.add_argument("-v",
                         "--verbose",
                         help="increase output verbosity",
                         action="store_true")
     args = parser.parse_args()
-    
+
     # Setup logging
     if args.verbose:
         loglevel = logging.DEBUG
     else:
         loglevel = logging.INFO
-    
+
     main(args, loglevel)
