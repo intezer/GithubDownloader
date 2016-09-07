@@ -18,7 +18,10 @@ def main(args, loglevel):
 
     socket.setdefaulttimeout(args.timeout)
 
-    g = github.Github()
+    if args.username and args.password:
+      g = github.Github(args.username, args.password)
+    else:
+      g = github.Github()
 
     if args.repo_file:
         with open(args.repo_file, 'r') as f:
@@ -57,9 +60,9 @@ def download_files(args, g, repo_gen):
                     output_path += "-" + str(file_counter)
                 try:
                     urlretrieve(file, output_path)
-                except Exception as e:
+                except Exception:
                     logging.exception('Error downloading %s.' % file)
-        except Exception as e:
+        except Exception:
              logging.exception('Error fetching repository %s.' % line)
 
     args.yara_meta = os.path.join(args.output_dir, args.yara_meta)
@@ -67,19 +70,29 @@ def download_files(args, g, repo_gen):
         for i in os.listdir(args.output_dir):
             try:
                 f.write("include \"" + i + "\"\n")
-            except Exception as e:
+            except Exception:
                 logging.exception('Couldn\'t write to %s.' % args.yara_meta)
 
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description = "Github file downloader")
+    parser.add_argument("-u",
+                        "--username",
+                        default = None,
+                        help = "Username used to authenticate with github for increased rate limit")
+
+    parser.add_argument("-p",
+                        "--password",
+                        default = None,
+                        help = "Password or token used to authenticate with github")
+
     parser.add_argument("-r",
                         "--repo_file",
                         help = "Path for the input file which contains a url of a Github repository for each separate line")
 
-    parser.add_argument("-p",
-                        "--crawl_since",
+    parser.add_argument("-l",
+                        "--last_page",
                         default = github.GithubObject.NotSet,
                         help = "When not using a repo_file, this will be used as starting position for github repo crawl")
 
