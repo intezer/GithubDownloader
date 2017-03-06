@@ -2,7 +2,8 @@
 #
 
 import sys, os, argparse, logging, fnmatch, posixpath, socket
-from github import Github
+import github
+
 if sys.version_info < (3, 0):
     # python 2
     import urlparse
@@ -17,15 +18,23 @@ def main(args, loglevel):
 
     socket.setdefaulttimeout(args.timeout)
 
-    g = Github()
+    g = github.Github()
 
     if args.repo_file:
         with open(args.repo_file, 'r') as f:
             repo_gen = f
             download_files(args, g, repo_gen)
     else:
-        repo_gen = (repo.html_url for repo in g.get_repos() if not repo.fork)
-        download_files(args, g, repo_gen)
+        def repo_gen():
+            last_page = args.crawl_since
+            git_repo_gen = g.get_repos(since=args.crawl_since)
+            for repo in git_repo_gen:
+                current_page = git_repo_gen.__nextUrl
+                if current_page != last_page:
+                    print("Finished processing: {}".format(current_page))
+                    last_page = current_page
+                yield repo
+        download_files(args, g, repo_gen())
 
 def download_files(args, g, repo_gen):
     file_counter = 0
@@ -68,6 +77,11 @@ if __name__ == '__main__':
     parser.add_argument("-r",
                         "--repo_file",
                         help = "Path for the input file which contains a url of a Github repository for each separate line")
+
+    parser.add_argument("-p",
+                        "--crawl_since",
+                        default = github.GithubObject.NotSet,
+                        help = "When not using a repo_file, this will be used as starting position for github repo crawl")
 
     parser.add_argument("-w",
                         "--wildcard",
