@@ -24,35 +24,34 @@ def main(args, loglevel):
       g = github.Github()
 
     if args.repo_file:
-        with open(args.repo_file, 'r') as f:
-            download_files(args, g, f)
+        repo_gen = file_repo_gen(args.repo_file, g)
     else:
-        download_files(args, g, repo_gen(args, g))
+        repo_gen = global_repo_gen(args, g)
+    download_files(args, g, repo_gen)
+
+def file_repo_gen(repo_file, g):
+    with open(repo_file, 'r') as f:
+        for line in f:
+            repo_str = line.rstrip().split('github.com/')[-1]
+            yield g.get_repo(repo_str)
 
 
-def repo_gen(args, g):
-    last_page = args.last_page
-    git_repo_gen = g.get_repos(since=args.last_page)
+def global_repo_gen(args, g):
+    git_repo_gen = g.get_repos(since=args.last_repo)
     for repo in git_repo_gen:
-        current_page = git_repo_gen.__nextUrl
-        if current_page != last_page:
-            print("Finished processing: {}".format(current_page))
-            last_page = current_page
         yield repo
 
 
 def download_files(args, g, repo_gen):
     file_counter = 0
-    for line in repo_gen:
-        logging.info('Fetching repository: %s' % line)
+    for repo in repo_gen:
+        logging.info('Fetching repository: %s' % repo.full_name)
         try:
-            repo_str = line.rstrip().split('github.com/')[-1]
-            repo = g.get_repo(repo_str)
             tree = repo.get_git_tree('master', recursive=True)
             files_to_download = []
             for file in tree.tree:
                 if fnmatch.fnmatch(file.path, args.wildcard):
-                    files_to_download.append('https://github.com/%s/raw/master/%s' % (repo_str, file.path))
+                    files_to_download.append('https://github.com/%s/raw/master/%s' % (repo.full_name, file.path))
             for file in files_to_download:
                 logging.info('Downloading %s' % file)
                 file_counter += 1
@@ -65,7 +64,7 @@ def download_files(args, g, repo_gen):
                 except Exception:
                     logging.exception('Error downloading %s.' % file)
         except Exception:
-             logging.exception('Error fetching repository %s.' % line)
+             logging.exception('Error fetching repository %s.' % repo.full_name)
 
     args.yara_meta = os.path.join(args.output_dir, args.yara_meta)
     with open(args.yara_meta, 'w') as f:
@@ -94,7 +93,8 @@ if __name__ == '__main__':
                         help = "Path for the input file which contains a url of a Github repository for each separate line")
 
     parser.add_argument("-l",
-                        "--last_page",
+                        "--last_repo",
+                        type=int,
                         default = github.GithubObject.NotSet,
                         help = "When not using a repo_file, this will be used as starting position for github repo crawl")
 
