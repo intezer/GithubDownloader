@@ -25,19 +25,21 @@ def main(args, loglevel):
 
     if args.repo_file:
         with open(args.repo_file, 'r') as f:
-            repo_gen = f
-            download_files(args, g, repo_gen)
+            download_files(args, g, f)
     else:
-        def repo_gen():
-            last_page = args.crawl_since
-            git_repo_gen = g.get_repos(since=args.crawl_since)
-            for repo in git_repo_gen:
-                current_page = git_repo_gen.__nextUrl
-                if current_page != last_page:
-                    print("Finished processing: {}".format(current_page))
-                    last_page = current_page
-                yield repo
-        download_files(args, g, repo_gen())
+        download_files(args, g, repo_gen(args, g))
+
+
+def repo_gen(args, g):
+    last_page = args.last_page
+    git_repo_gen = g.get_repos(since=args.last_page)
+    for repo in git_repo_gen:
+        current_page = git_repo_gen.__nextUrl
+        if current_page != last_page:
+            print("Finished processing: {}".format(current_page))
+            last_page = current_page
+        yield repo
+
 
 def download_files(args, g, repo_gen):
     file_counter = 0
