@@ -26,7 +26,7 @@ def main(args, loglevel):
     if args.repo_file:
         repo_gen = file_repo_gen(args.repo_file, g)
     else:
-        repo_gen = global_repo_gen(args, g)
+        repo_gen = g.get_repos(since=args.last_repo)
     download_files(args, g, repo_gen)
 
 def file_repo_gen(repo_file, g):
@@ -36,16 +36,10 @@ def file_repo_gen(repo_file, g):
             yield g.get_repo(repo_str)
 
 
-def global_repo_gen(args, g):
-    git_repo_gen = g.get_repos(since=args.last_repo)
-    for repo in git_repo_gen:
-        yield repo
-
-
 def download_files(args, g, repo_gen):
     file_counter = 0
     for repo in repo_gen:
-        logging.info('Fetching repository: %s' % repo.full_name)
+        logging.info('Fetching repository: %s (id: %i)' % repo.full_name, repo.id)
         try:
             tree = repo.get_git_tree('master', recursive=True)
             files_to_download = []
