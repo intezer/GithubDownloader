@@ -39,7 +39,7 @@ def file_repo_gen(repo_file, g):
 def download_files(args, g, repo_gen):
     file_counter = 0
     for repo in repo_gen:
-        logging.info('Fetching repository: %s (id: %i)' % repo.full_name, repo.id)
+        logging.info('Fetching repository: %s (id: %i)' % (repo.full_name, repo.id))
         try:
             tree = repo.get_git_tree('master', recursive=True)
             files_to_download = []
