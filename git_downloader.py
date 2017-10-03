@@ -39,8 +39,9 @@ def file_repo_gen(repo_file, g):
 def download_files(args, g, repo_gen):
     file_counter = 0
     for repo in repo_gen:
-        logging.info('Fetching repository: %s (id: %i)' % (repo.full_name, repo.id))
+        
         try:
+            logging.info('Fetching repository: %s (id: %i)' % (repo.full_name, repo.id))
             tree = repo.get_git_tree('master', recursive=True)
             files_to_download = []
             for file in tree.tree:
@@ -48,6 +49,7 @@ def download_files(args, g, repo_gen):
                     files_to_download.append('https://github.com/%s/raw/master/%s' % (repo.full_name, file.path))
             for file in files_to_download:
                 logging.info('Downloading %s' % file)
+                file = file.replace(" ", "%20")
                 file_counter += 1
                 filename = posixpath.basename(urlparse.urlsplit(file).path)
                 output_path = os.path.join(args.output_dir, filename)
@@ -58,7 +60,7 @@ def download_files(args, g, repo_gen):
                 except Exception:
                     logging.exception('Error downloading %s.' % file)
         except Exception:
-             logging.exception('Error fetching repository %s.' % repo.full_name)
+            logging.exception('Error fetching repository.')
 
     args.yara_meta = os.path.join(args.output_dir, args.yara_meta)
     with open(args.yara_meta, 'w') as f:
