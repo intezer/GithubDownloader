@@ -8,10 +8,12 @@ if sys.version_info < (3, 0):
     # python 2
     import urlparse
     from urllib import urlretrieve
+    from urllib import quote
 else:
     # python 3
     import urllib.parse as urlparse
     from urllib.request import urlretrieve
+    from urllib.parse import quote
 
 def main(args, loglevel):
     logging.basicConfig(format="%(levelname)s: %(message)s", level=loglevel)
@@ -49,7 +51,7 @@ def download_files(args, g, repo_gen):
                     files_to_download.append('https://github.com/%s/raw/master/%s' % (repo.full_name, file.path))
             for file in files_to_download:
                 logging.info('Downloading %s' % file)
-                file = file.replace(" ", "%20")
+                file = quote(file)
                 file_counter += 1
                 filename = posixpath.basename(urlparse.urlsplit(file).path)
                 output_path = os.path.join(args.output_dir, filename)
